@@ -1,0 +1,36 @@
+{
+  "Title": "ISV Change Requests",
+  "Description": "List to store ISV change requests, status, reviewers and links to documents.",
+  "Fields": [
+    { "InternalName": "Title", "DisplayName": "Request Title", "Type": "Text", "Required": true },
+    { "InternalName": "RequestID", "DisplayName": "Request ID", "Type": "Text", "Required": true },
+    { "InternalName": "RequestorName", "DisplayName": "Requestor Name", "Type": "Text", "Required": true },
+    { "InternalName": "RequestorEmail", "DisplayName": "Requestor Email", "Type": "Text", "Required": true },
+  { "InternalName": "Department", "DisplayName": "Department", "Type": "Choice", "Choices": ["Information Systems","Validation","Human Resources","Finance","Regulatory Affairs","Procurement","Operational Health and Safety","Commercial","Quality Assurance","Quality Control","Production","Engineering","Research and Development","Analytical Development","Supply Chain","Other"], "Required": true },
+    { "InternalName": "Summary", "DisplayName": "Summary", "Type": "Text", "Required": true },
+    { "InternalName": "Description", "DisplayName": "Description", "Type": "Note", "Required": false },
+    { "InternalName": "ChangeType", "DisplayName": "Change Type", "Type": "Choice", "Choices": ["Bug Fix","Enhancement","Config Change","Hotfix","Other"], "Required": true },
+    { "InternalName": "Priority", "DisplayName": "Priority", "Type": "Choice", "Choices": ["Low","Medium","High","Critical"], "Required": true },
+    { "InternalName": "Status", "DisplayName": "Status", "Type": "Choice", "Choices": ["Pending","Under Review","Approved","Rejected","Implemented"], "Default": "Pending", "Required": true },
+    { "InternalName": "AssignedTo", "DisplayName": "Assigned To", "Type": "User", "Required": false },
+    { "InternalName": "Reviewer", "DisplayName": "Reviewer", "Type": "User", "Required": false },
+    { "InternalName": "SubmittedDate", "DisplayName": "Submitted Date", "Type": "DateTime", "Required": true },
+    { "InternalName": "TargetDate", "DisplayName": "Target Implementation Date", "Type": "DateTime", "Required": false },
+    { "InternalName": "Documents", "DisplayName": "Documents (OneDrive/SharePoint links)", "Type": "URL", "Required": false },
+  { "InternalName": "SpiceWaxRef", "DisplayName": "Spice Wax Reference", "Type": "Text", "Required": false },
+  { "InternalName": "RequestedBy", "DisplayName": "Requested By", "Type": "Text", "Required": false },
+  { "InternalName": "DateRequested", "DisplayName": "Date Requested", "Type": "DateTime", "Required": false },
+  { "InternalName": "Initiator", "DisplayName": "Initiator", "Type": "Text", "Required": false },
+  { "InternalName": "SystemName", "DisplayName": "System", "Type": "Text", "Required": false },
+  { "InternalName": "PolicyFormComplete", "DisplayName": "Policy Form Complete", "Type": "Boolean", "Required": false },
+  { "InternalName": "SOPTrainingComplete", "DisplayName": "SOP Training Complete", "Type": "Boolean", "Required": false },
+  { "InternalName": "BriefDescription", "DisplayName": "Brief Description", "Type": "Text", "Required": false },
+    { "InternalName": "AuditLog", "DisplayName": "Audit Log", "Type": "Note", "Required": false },
+    { "InternalName": "Comments", "DisplayName": "Comments", "Type": "Note", "Required": false }
+  ],
+  "Views": [
+    { "Title": "All Requests", "Fields": ["RequestID","Title","RequestorName","Department","Status","Priority","SubmittedDate","AssignedTo"] },
+    { "Title": "Pending / Under Review", "Filter": "Status eq 'Pending' or Status eq 'Under Review'", "Fields": ["RequestID","Title","Status","Reviewer","SubmittedDate"] },
+    { "Title": "My Assigned", "Filter": "AssignedTo eq [Me]", "Fields": ["RequestID","Title","Status","Priority","TargetDate"] }
+  ]
+}

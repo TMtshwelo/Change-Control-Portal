@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ISV Change Control Portal - Prototype</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>ISV Change Control Portal — Prototype</h1>
+    <p>Local demo: stores data in browser (localStorage). Use this to demo workflow and fields; integrate with SharePoint/Power Platform later.</p>
+  </header>
+
+  <main>
+    <section id="submission">
+      <h2>Submit Change Request</h2>
+      <form id="requestForm">
+        <label>Request Title<br><input required name="title" /></label>
+        <label>Requested By<br><input required name="requestedBy" placeholder="Name of requester" /></label>
+        <label>Date Requested<br><input required name="dateRequested" type="date" /></label>
+        <label>Requestor Email<br><input required name="requestorEmail" type="email" /></label>
+        <label>Department<br>
+          <select name="department">
+            <option>Information Systems</option>
+            <option>Validation</option>
+            <option>Human Resources</option>
+            <option>Finance</option>
+            <option>Regulatory Affairs</option>
+            <option>Procurement</option>
+            <option>Operational Health and Safety</option>
+            <option>Commercial</option>
+            <option>Quality Assurance</option>
+            <option>Quality Control</option>
+            <option>Production</option>
+            <option>Engineering</option>
+            <option>Research and Development</option>
+            <option>Analytical Development</option>
+            <option>Supply Chain</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Summary<br><input required name="summary" /></label>
+  <label>Description (details)<br><textarea name="description"></textarea></label>
+        <label>Change Type<br>
+          <select name="changeType">
+            <option>Bug Fix</option>
+            <option>Enhancement</option>
+            <option>Config Change</option>
+            <option>Hotfix</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Priority<br>
+          <select name="priority">
+            <option>Low</option>
+            <option selected>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </label>
+        <label>Target Implementation Date<br><input type="date" name="targetDate" /></label>
+        <label>Documents (URL)<br><input name="documents" placeholder="OneDrive / SharePoint link" /></label>
+        <label>Spice Wax Reference<br><input name="spiceWaxRef" /></label>
+        <fieldset style="margin-top:8px;padding:8px;border:1px solid #ddd">
+          <legend>Change information</legend>
+          <label>Select system<br>
+            <select name="systemName" id="systemNameSelect">
+              <option value="">-- choose or type --</option>
+              <option>Core Billing</option>
+              <option>Customer Portal</option>
+              <option>Data Warehouse</option>
+              <option>Reporting</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label id="otherSystemLabel" style="display:none">If not present, type system name<br><input name="systemNameOther" id="systemNameOther" /></label>
+          <label style="display:block;margin-top:8px">Initiator<br><input name="initiator" /></label>
+          <div style="margin-top:8px">
+            <label><input type="checkbox" name="policyFormComplete" value="1" /> User completed policy form</label><br>
+            <label><input type="checkbox" name="sopTrainingComplete" value="1" /> User received appropriate SOP training</label>
+          </div>
+          <label style="display:block;margin-top:8px">Please provide a brief description of the request<br><textarea name="briefDescription"></textarea></label>
+        </fieldset>
+        <div class="actions">
+          <button type="submit">Submit Request</button>
+          <button type="button" id="resetDemo">Reset Demo Data</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="views">
+      <h2>Requests</h2>
+      <div class="tabs">
+        <button data-tab="all" class="active">All Requests</button>
+        <button data-tab="admin">Admin Dashboard</button>
+      </div>
+
+      <div id="tabAll" class="tab active">
+        <table id="requestsTable">
+          <thead>
+            <tr><th>ID</th><th>Title</th><th>Requestor</th><th>Dept</th><th>Status</th><th>Priority</th><th>Submitted</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button id="exportCsv">Export CSV</button>
+      </div>
+
+      <div id="tabAdmin" class="tab">
+        <label>Filter Status
+          <select id="filterStatus">
+            <option value="">(all)</option>
+            <option>Pending</option>
+            <option>Under Review</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+            <option>Implemented</option>
+          </select>
+        </label>
+        <div id="adminList"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>Prototype created from FCC ISV Change Control proposal. Not connected to production systems.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

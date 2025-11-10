@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ISV Change Control Dashboard — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="modern.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .nav-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .nav-bar a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .nav-bar a:hover {
+            text-decoration: underline;
+        }
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        .dashboard-table th, .dashboard-table td {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        .dashboard-table th {
+            background: var(--surface);
+            font-weight: bold;
+        }
+        .status-approved { color: green; }
+        .status-pending { color: #cc6600; font-weight: bold; }
+        .status-rejected { color: red; }
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .search-bar {
+            margin-left: auto;
+        }
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        .summary-panel {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .notifications {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        .notification-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">FCC • ISV Change Portal</div>
+            <nav>
+                <a class="nav-link active" href="#" data-action="dashboard">Dashboard</a>
+                <a class="nav-link" href="#" data-action="submit">Submit Request</a>
+                <div style="margin-left: 1rem; margin-top: 0.5rem;">
+                    <a class="nav-link" href="#" onclick="filterType.value='Change'; filterTable();" style="font-size: 0.9rem;">Change Control</a>
+                    <a class="nav-link" href="#" onclick="filterType.value='Risk'; filterTable();" style="font-size: 0.9rem;">Risk Assessment</a>
+                    <a class="nav-link" href="#" onclick="filterType.value='Incident'; filterTable();" style="font-size: 0.9rem;">Incident</a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">Logged in as <span id="profileName" class="profile-pill">Guest</span></div>
+        </aside>
+
+        <main class="main-content">
+        <header class="bar">
+          <div class="bar-left">
+            <h1>ISV Change Control Dashboard</h1>
+            <p class="muted">Welcome, <span id="userName">Guest</span></p>
+            <div id="lastSynced" style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;"></div>
+          </div>
+                <div class="bar-right">
+                    <nav class="nav-bar">
+                        <a href="welcome.html">Home</a>
+                        <a href="reports.html">Reports</a>
+                    </nav>
+                </div>
+            </header>
+
+            <div class="main-layout">
+                <div>
+                    <div class="filters">
+                        <label>Request Type:
+                            <select id="filterType">
+                                <option value="">All</option>
+                                <option value="Change">Change Control</option>
+                                <option value="Risk">Risk Assessment</option>
+                                <option value="Incident">Incident</option>
+                            </select>
+                        </label>
+                        <label>Status:
+                            <select id="filterStatus">
+                                <option value="">All</option>
+                                <option>Pending</option>
+                                <option>Approved</option>
+                                <option>Rejected</option>
+                                <option>Implemented</option>
+                                <option>Under Review</option>
+                            </select>
+                        </label>
+                        <label>Department:
+                            <select id="filterDept">
+                                <option value="">All</option>
+                                <option>Information Systems</option>
+                                <option>Validation</option>
+                                <option>Human Resources</option>
+                                <option>Finance</option>
+                                <option>Regulatory Affairs</option>
+                                <option>Procurement</option>
+                                <option>Operational Health and Safety</option>
+                                <option>Commercial</option>
+                                <option>Quality Assurance</option>
+                                <option>Quality Control</option>
+                                <option>Production</option>
+                                <option>Engineering</option>
+                                <option>Research and Development</option>
+                                <option>Analytical Development</option>
+                                <option>Supply Chain</option>
+                                <option>Other</option>
+                            </select>
+                        </label>
+                        <label>Date Range:
+                            <input type="date" id="dateFrom"> to <input type="date" id="dateTo">
+                        </label>
+                        <div class="search-bar">
+                            <input id="search" placeholder="🔍 Search requests..." />
+                        </div>
+                    </div>
+
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Type</th>
+                                <th>Requestor</th>
+                                <th>Assignee</th>
+                                <th>Identifier</th>
+                                <th>System</th>
+                                <th>Department</th>
+                                <th>Date Submitted</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="status-approved">✅ Approved</td>
+                                <td>Change</td>
+                                <td>T. Mokoena</td>
+                                <td>J. Daniels</td>
+                                <td>CHG-001</td>
+                                <td>SAP</td>
+                                <td>Information Systems</td>
+                                <td>2025-11-04</td>
+                                <td>2025-11-05</td>
+                            </tr>
+                            <tr>
+                                <td class="status-pending">🕒 Pending</td>
+                                <td>Risk</td>
+                                <td>A. Smith</td>
+                                <td>—</td>
+                                <td>RSK-002</td>
+                                <td>MES</td>
+                                <td>Validation</td>
+                                <td>2025-11-05</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td class="status-rejected">❌ Rejected</td>
+                                <td>Incident</td>
+                                <td>K. Naidoo</td>
+                                <td>M. Jacobs</td>
+                                <td>INC-003</td>
+                                <td>HVAC</td>
+                                <td>Operational Health and Safety</td>
+                                <td>2025-11-03</td>
+                                <td>2025-11-04</td>
+                            </tr>
+                            <tr>
+                                <td class="status-approved">✅ Approved</td>
+                                <td>Change</td>
+                                <td>L. Johnson</td>
+                                <td>R. Patel</td>
+                                <td>CHG-004</td>
+                                <td>ERP</td>
+                                <td>Finance</td>
+                                <td>2025-11-02</td>
+                                <td>2025-11-03</td>
+                            </tr>
+                            <tr>
+                                <td class="status-pending">🕒 Pending</td>
+                                <td>Risk</td>
+                                <td>B. Williams</td>
+                                <td>—</td>
+                                <td>RSK-005</td>
+                                <td>LIMS</td>
+                                <td>Quality Assurance</td>
+                                <td>2025-11-06</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td class="status-approved">✅ Approved</td>
+                                <td>Incident</td>
+                                <td>S. Lee</td>
+                                <td>P. Kumar</td>
+                                <td>INC-006</td>
+                                <td>Network</td>
+                                <td>Information Systems</td>
+                                <td>2025-11-01</td>
+                                <td>2025-11-02</td>
+                            </tr>
+                            <tr>
+                                <td class="status-rejected">❌ Rejected</td>
+                                <td>Change</td>
+                                <td>M. Garcia</td>
+                                <td>T. Brown</td>
+                                <td>CHG-007</td>
+                                <td>CRM</td>
+                                <td>Sales</td>
+                                <td>2025-10-30</td>
+                                <td>2025-10-31</td>
+                            </tr>
+                            <tr>
+                                <td class="status-pending">🕒 Pending</td>
+                                <td>Incident</td>
+                                <td>D. Chen</td>
+                                <td>—</td>
+                                <td>INC-008</td>
+                                <td>Security</td>
+                                <td>Regulatory Affairs</td>
+                                <td>2025-11-07</td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="export-buttons">
+                        <button id="exportExcel">📤 Export to Excel</button>
+                        <button id="printReport">🖨️ Print Report</button>
+                    </div>
+                </div>
+
+                <aside>
+                    <div class="summary-panel">
+                        <h3>Reports Summary</h3>
+                        <div class="summary-item">
+                            <span>Total Requests:</span>
+                            <span id="totalRequests">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Pending:</span>
+                            <span id="pendingRequests">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Approved:</span>
+                            <span id="approvedRequests">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Rejected:</span>
+                            <span id="rejectedRequests">0</span>
+                        </div>
+                    </div>
+
+                    <div class="notifications">
+                        <h3>Recent Activity</h3>
+                        <div class="notification-item">
+                            <strong>CHG-001</strong> approved by J. Daniels
+                            <div style="font-size: 0.875rem; color: var(--text-muted);">2 hours ago</div>
+                        </div>
+                        <div class="notification-item">
+                            <strong>RSK-002</strong> submitted by A. Smith
+                            <div style="font-size: 0.875rem; color: var(--text-muted);">4 hours ago</div>
+                        </div>
+                        <div class="notification-item">
+                            <strong>INC-003</strong> rejected by M. Jacobs
+                            <div style="font-size: 0.875rem; color: var(--text-muted);">1 day ago</div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <footer class="foot">Data pulled from SharePoint Lists. This is the user dashboard view.</footer>
+        </main>
+    </div>
+
+    <script>
+        let allRequests = [];
+
+        // Personalize for demo user
+        const profileName = document.getElementById('profileName');
+        const userName = document.getElementById('userName');
+        const user = sessionStorage.getItem('demoUser') || 'Guest';
+        profileName.textContent = user;
+        userName.textContent = user;
+
+        // Fetch requests from API
+        async function fetchRequests() {
+            try {
+                const response = await fetch('/api/requests');
+                const data = await response.json();
+                allRequests = data;
+                renderTable(allRequests);
+                updateSummary(allRequests);
+                updateLastSynced();
+            } catch (error) {
+                console.error('Error fetching requests:', error);
+                // Fallback to static data if API fails
+                renderStaticTable();
+                updateSummaryFromTable();
+            }
+        }
+
+        // Render table with data
+        function renderTable(requests) {
+            const tbody = document.querySelector('.dashboard-table tbody');
+            tbody.innerHTML = '';
+
+            requests.forEach(req => {
+                const statusIcon = req.status === 'Approved' ? '✅' : req.status === 'Rejected' ? '❌' : '🕒';
+                const statusClass = req.status === 'Approved' ? 'status-approved' : req.status === 'Rejected' ? 'status-rejected' : 'status-pending';
+                const type = req.changeType || 'Change';
+                const date = new Date(req.submittedDate).toISOString().split('T')[0];
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="${statusClass}">${statusIcon} ${req.status}</td>
+                    <td>${type}</td>
+                    <td>${req.requestorName || req.requestedBy || 'Unknown'}</td>
+                    <td>${req.assignedTo || '—'}</td>
+                    <td>${req.requestId}</td>
+                    <td>${req.systemName || 'N/A'}</td>
+                    <td>${req.department || 'Other'}</td>
+                    <td>${date}</td>
+                    <td>${req.submittedDate ? new Date(req.submittedDate).toISOString().split('T')[0] : '—'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Fallback static table
+        function renderStaticTable() {
+            const tbody = document.querySelector('.dashboard-table tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td class="status-approved">✅ Approved</td>
+                    <td>Change</td>
+                    <td>T. Mokoena</td>
+                    <td>J. Daniels</td>
+                    <td>CHG-001</td>
+                    <td>SAP</td>
+                    <td>Information Systems</td>
+                    <td>2025-11-04</td>
+                    <td>2025-11-05</td>
+                </tr>
+                <tr>
+                    <td class="status-pending">🕒 Pending</td>
+                    <td>Risk</td>
+                    <td>A. Smith</td>
+                    <td>—</td>
+                    <td>RSK-002</td>
+                    <td>MES</td>
+                    <td>Validation</td>
+                    <td>2025-11-05</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td class="status-rejected">❌ Rejected</td>
+                    <td>Incident</td>
+                    <td>K. Naidoo</td>
+                    <td>M. Jacobs</td>
+                    <td>INC-003</td>
+                    <td>HVAC</td>
+                    <td>Operational Health and Safety</td>
+                    <td>2025-11-03</td>
+                    <td>2025-11-04</td>
+                </tr>
+                <tr>
+                    <td class="status-approved">✅ Approved</td>
+                    <td>Change</td>
+                    <td>L. Johnson</td>
+                    <td>R. Patel</td>
+                    <td>CHG-004</td>
+                    <td>ERP</td>
+                    <td>Finance</td>
+                    <td>2025-11-02</td>
+                    <td>2025-11-03</td>
+                </tr>
+                <tr>
+                    <td class="status-pending">🕒 Pending</td>
+                    <td>Risk</td>
+                    <td>B. Williams</td>
+                    <td>—</td>
+                    <td>RSK-005</td>
+                    <td>LIMS</td>
+                    <td>Quality Assurance</td>
+                    <td>2025-11-06</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td class="status-approved">✅ Approved</td>
+                    <td>Incident</td>
+                    <td>S. Lee</td>
+                    <td>P. Kumar</td>
+                    <td>INC-006</td>
+                    <td>Network</td>
+                    <td>Information Systems</td>
+                    <td>2025-11-01</td>
+                    <td>2025-11-02</td>
+                </tr>
+                <tr>
+                    <td class="status-rejected">❌ Rejected</td>
+                    <td>Change</td>
+                    <td>M. Garcia</td>
+                    <td>T. Brown</td>
+                    <td>CHG-007</td>
+                    <td>CRM</td>
+                    <td>Sales</td>
+                    <td>2025-10-30</td>
+                    <td>2025-10-31</td>
+                </tr>
+                <tr>
+                    <td class="status-pending">🕒 Pending</td>
+                    <td>Incident</td>
+                    <td>D. Chen</td>
+                    <td>—</td>
+                    <td>INC-008</td>
+                    <td>Security</td>
+                    <td>Regulatory Affairs</td>
+                    <td>2025-11-07</td>
+                    <td>—</td>
+                </tr>
+            `;
+        }
+
+        // Update last synced timestamp
+        function updateLastSynced() {
+            const now = new Date();
+            document.getElementById('lastSynced').textContent = `Last synced: ${now.toLocaleString()}`;
+        }
+
+        // Filter functionality
+        const filterType = document.getElementById('filterType');
+        const filterStatus = document.getElementById('filterStatus');
+        const filterDept = document.getElementById('filterDept');
+        const dateFrom = document.getElementById('dateFrom');
+        const dateTo = document.getElementById('dateTo');
+        const search = document.getElementById('search');
+
+        function filterTable() {
+            const typeValue = filterType.value;
+            const statusValue = filterStatus.value;
+            const deptValue = filterDept.value;
+            const fromDate = dateFrom.value ? new Date(dateFrom.value) : null;
+            const toDate = dateTo.value ? new Date(dateTo.value) : null;
+            const searchValue = search.value.toLowerCase();
+
+            let filteredRequests = allRequests.filter(req => {
+                const reqType = req.changeType || 'Change';
+                const reqStatus = req.status;
+                const reqDept = req.department || 'Other';
+                const reqDate = new Date(req.submittedDate);
+                const reqText = `${req.title || ''} ${req.requestorName || ''} ${req.requestId || ''} ${req.systemName || ''}`.toLowerCase();
+
+                if (typeValue && reqType !== typeValue) return false;
+                if (statusValue && reqStatus !== statusValue) return false;
+                if (deptValue && reqDept !== deptValue) return false;
+                if (fromDate && reqDate < fromDate) return false;
+                if (toDate && reqDate > toDate) return false;
+                if (searchValue && !reqText.includes(searchValue)) return false;
+
+                return true;
+            });
+
+            renderTable(filteredRequests);
+            updateSummary(filteredRequests);
+        }
+
+        filterType.addEventListener('change', filterTable);
+        filterStatus.addEventListener('change', filterTable);
+        filterDept.addEventListener('change', filterTable);
+        dateFrom.addEventListener('change', filterTable);
+        dateTo.addEventListener('change', filterTable);
+        search.addEventListener('input', filterTable);
+
+        // Update summary counts
+        function updateSummary(requests) {
+            let total = requests.length;
+            let pending = requests.filter(r => r.status === 'Pending').length;
+            let approved = requests.filter(r => r.status === 'Approved').length;
+            let rejected = requests.filter(r => r.status === 'Rejected').length;
+
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('pendingRequests').textContent = pending;
+            document.getElementById('approvedRequests').textContent = approved;
+            document.getElementById('rejectedRequests').textContent = rejected;
+        }
+
+        // Fallback summary from static table
+        function updateSummaryFromTable() {
+            const rows = document.querySelectorAll('.dashboard-table tbody tr');
+            let total = rows.length;
+            let pending = 0;
+            let approved = 0;
+            let rejected = 0;
+
+            rows.forEach(row => {
+                const statusCell = row.cells[0].textContent.trim();
+                if (statusCell.includes('Pending')) pending++;
+                else if (statusCell.includes('Approved')) approved++;
+                else if (statusCell.includes('Rejected')) rejected++;
+            });
+
+            document.getElementById('totalRequests').textContent = total;
+            document.getElementById('pendingRequests').textContent = pending;
+            document.getElementById('approvedRequests').textContent = approved;
+            document.getElementById('rejectedRequests').textContent = rejected;
+        }
+
+        // Load data on page load
+        fetchRequests();
+
+        // Export buttons
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            window.open('/api/export', '_blank');
+        });
+        document.getElementById('printReport').addEventListener('click', () => window.print());
+    </script>
+</body>
+</html>

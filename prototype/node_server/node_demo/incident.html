@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Report an Incident — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="modern.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .welcome-banner {
+            background: linear-gradient(90deg, var(--surface), rgba(14, 165, 233, 0.1));
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+        .form-section {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            background: var(--surface);
+            color: var(--text);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+        .timestamp {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        .sidebar-info {
+            background: var(--card);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .sidebar-info h4 {
+            margin-top: 0;
+        }
+        .recent-incidents {
+            list-style: none;
+            padding: 0;
+        }
+        .recent-incidents li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">FCC • ISV Change Portal</div>
+            <nav>
+                <a class="nav-link" href="welcome.html">Home</a>
+                <a class="nav-link active" href="#" data-action="incident">Report an Incident</a>
+            </nav>
+            <div class="sidebar-footer">Logged in as <span id="profileName" class="profile-pill">Guest</span></div>
+        </aside>
+
+        <main class="main-content">
+            <header class="bar">
+                <div class="bar-left">
+                    <h1>Report an Incident</h1>
+                    <p class="muted">Please complete all fields to submit an incident report.</p>
+                    <div class="timestamp" id="timestamp"></div>
+                </div>
+                <div class="bar-right">
+                    <button id="backToWelcome">Back to Welcome</button>
+                </div>
+            </header>
+
+                <div>
+                    <form id="incidentForm" class="form-section">
+                        <div class="form-group">
+                            <label for="reportedBy">Reported By</label>
+                            <input type="text" id="reportedBy" required readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="dateOfIncident">Date of Incident</label>
+                            <input type="date" id="dateOfIncident" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="timeOfIncident">Time of Incident</label>
+                            <input type="time" id="timeOfIncident">
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentType">Incident Type</label>
+                            <select id="incidentType" required>
+                                <option value="">Select Type</option>
+                                <option value="Safety">Safety</option>
+                                <option value="System Failure">System Failure</option>
+                                <option value="Unauthorized Access">Unauthorized Access</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="locationAffected">Location / System Affected</label>
+                            <input type="text" id="locationAffected" placeholder="Specify system or physical location" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="severityLevel">Severity Level</label>
+                            <select id="severityLevel" required>
+                                <option value="">Select Severity</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" placeholder="Detailed explanation of what happened" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="immediateAction">Immediate Action Taken</label>
+                            <textarea id="immediateAction" placeholder="What was done at the time"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="supportingDocs">Upload Supporting Documents</label>
+                            <input type="file" id="supportingDocs" multiple>
+                        </div>
+                        <button type="submit" class="submit-btn">Submit Incident Report</button>
+                    </form>
+                </div>
+                <aside>
+                    <div class="sidebar-info">
+                        <h4>Incident Reporting Guidelines</h4>
+                        <p style="color: var(--muted); font-size: 0.875rem;">Report all incidents promptly. Include as much detail as possible to ensure proper investigation.</p>
+                        <p><a href="#" style="color: var(--accent);">View Full Guidelines</a></p>
+                    </div>
+                    <div class="sidebar-info">
+                    </div>
+                    <div class="sidebar-info">
+                        <h4>Recent Incidents Summary</h4>
+                        <ul class="recent-incidents">
+                            <li><strong>Safety Incident</strong> - Warehouse A, 2 days ago</li>
+                            <li><strong>System Failure</strong> - ERP System, 1 week ago</li>
+                            <li><strong>Unauthorized Access</strong> - Server Room, 2 weeks ago</li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+
+            <footer class="foot">This is a demo page. Submission is simulated and does not trigger real workflows.</footer>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('backToWelcome').addEventListener('click', () => {
+            window.location.href = 'welcome.html';
+        });
+        const profileName = document.getElementById('profileName');
+        const user = sessionStorage.getItem('demoUser') || 'Guest';
+        profileName.textContent = user;
+
+        // Auto-fill reported by
+        document.getElementById('reportedBy').value = user;
+
+        // Set timestamp
+        const now = new Date();
+        document.getElementById('timestamp').textContent = `Submitted on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
+
+        // Form submission
+        document.getElementById('incidentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Incident report submitted successfully! (Demo - data simulated, no real submission)');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ISV Change Control Portal — Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">FCC • ISV Change Portal</div>
+        <nav>
+          <a class="nav-link active" href="#" data-action="dashboard">Dashboard</a>
+          <a class="nav-link" href="#" data-action="submit">Submit Request</a>
+          <a class="nav-link" href="#" data-action="reports">Reports</a>
+        </nav>
+        <div class="sidebar-footer">Prototype • Local demo</div>
+      </aside>
+
+      <main class="main-content">
+        <header class="bar">
+          <div class="bar-left">
+            <h1>Change Requests Dashboard</h1>
+            <p class="muted">Server-backed demo — SQLite persistence</p>
+          </div>
+          <div class="bar-right">
+            <input id="search" placeholder="Search requests..." />
+            <button id="refresh">Refresh</button>
+            <button id="exportCsv">Download CSV</button>
+            <button id="openSubmit">New Request</button>
+          </div>
+        </header>
+
+        <section class="summary-cards" id="summaryCards">
+          <!-- summary cards injected here -->
+        </section>
+
+        <section class="controls">
+          <label>Status:
+            <select id="filterStatus"><option value="">All</option><option>Pending</option><option>Under Review</option><option>Approved</option><option>Rejected</option><option>Implemented</option></select>
+          </label>
+          <label>Department:
+            <select id="filterDept"><option value="">All</option>
+              <option>Information Systems</option>
+              <option>Validation</option>
+              <option>Human Resources</option>
+              <option>Finance</option>
+              <option>Regulatory Affairs</option>
+              <option>Procurement</option>
+              <option>Operational Health and Safety</option>
+              <option>Commercial</option>
+              <option>Quality Assurance</option>
+              <option>Quality Control</option>
+              <option>Production</option>
+              <option>Engineering</option>
+              <option>Research and Development</option>
+              <option>Analytical Development</option>
+              <option>Supply Chain</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </section>
+
+        <section id="dashboardList" class="cards-grid">
+          <!-- request cards injected here -->
+        </section>
+
+        <footer class="foot">Data stored locally on server (SQLite). Use Admin to change status.</footer>
+      </main>
+    </div>
+
+    <!-- Modal: Submit / Edit -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-panel">
+        <button class="close" id="closeModal">×</button>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

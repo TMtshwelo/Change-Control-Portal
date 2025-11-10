@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CAPA Reports — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="modern.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <style>
+        .capa-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .capa-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+        .capa-subtitle {
+            font-size: 16px;
+            color: var(--muted);
+            margin: 0;
+        }
+        .capa-table-container {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .capa-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .capa-table th {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #021018;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .capa-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text);
+        }
+        .capa-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s ease;
+        }
+        .status-open {
+            background: rgba(34,197,94,0.1);
+            color: #22c55e;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .status-closed {
+            background: rgba(239,68,68,0.1);
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .extension-yes {
+            background: rgba(245,158,11,0.1);
+            color: #f59e0b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .extension-no {
+            background: rgba(107,114,128,0.1);
+            color: #6b7280;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .days-remaining {
+            font-weight: 600;
+        }
+        .days-remaining.warning {
+            color: #f59e0b;
+        }
+        .days-remaining.danger {
+            color: #ef4444;
+        }
+        @media (max-width: 768px) {
+            .capa-table {
+                font-size: 12px;
+            }
+            .capa-table th,
+            .capa-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">FCC • ISV Change Portal</div>
+            <nav>
+                <a class="nav-link" href="user_dashboard.html">Dashboard</a>
+                <a class="nav-link active" href="#" data-action="capa">CAPA Reports</a>
+            </nav>
+            <div class="sidebar-footer">CAPA • <span style="color:var(--muted)">Corrective Actions</span></div>
+        </aside>
+
+        <main class="main-content">
+            <header class="bar">
+                <div class="bar-left">
+                    <h1>CAPA Reports</h1>
+                    <p class="muted">Track Corrective and Preventive Actions across departments.</p>
+                </div>
+                <div class="bar-right">
+                    <button id="exportCapa">Export CSV</button>
+                    <button id="addCapa">Add CAPA</button>
+                </div>
+            </header>
+
+            <div class="capa-header">
+                <h2 class="capa-title">October 2024</h2>
+                <p class="capa-subtitle">CAPA Status Overview</p>
+            </div>
+
+            <div class="capa-table-container">
+                <table class="capa-table">
+                    <thead>
+                        <tr>
+                            <th>CAPA Number</th>
+                            <th>Department</th>
+                            <th>Responsible Person</th>
+                            <th>Title</th>
+                            <th>Days Remaining</th>
+                            <th>Status (Open)</th>
+                            <th>Status (Closed)</th>
+                            <th>Extension Granted Date</th>
+                            <th>Extension Granted (Yes/No)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CAPA-2024-001</td>
+                            <td>Quality Assurance</td>
+                            <td>John Smith</td>
+                            <td>Improve Batch Testing Procedures</td>
+                            <td class="days-remaining warning">7</td>
+                            <td><span class="status-open">Open</span></td>
+                            <td></td>
+                            <td>2024-10-15</td>
+                            <td><span class="extension-yes">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td>CAPA-2024-002</td>
+                            <td>Manufacturing</td>
+                            <td>Sarah Johnson</td>
+                            <td>Update Equipment Calibration Schedule</td>
+                            <td class="days-remaining">15</td>
+                            <td><span class="status-open">Open</span></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="extension-no">No</span></td>
+                        </tr>
+                        <tr>
+                            <td>CAPA-2024-003</td>
+                            <td>Regulatory Affairs</td>
+                            <td>Mike Davis</td>
+                            <td>Enhance Document Control Process</td>
+                            <td class="days-remaining danger">2</td>
+                            <td><span class="status-open">Open</span></td>
+                            <td></td>
+                            <td>2024-10-20</td>
+                            <td><span class="extension-yes">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td>CAPA-2024-004</td>
+                            <td>Quality Assurance</td>
+                            <td>Emily Chen</td>
+                            <td>Implement Supplier Quality Audits</td>
+                            <td class="days-remaining">30</td>
+                            <td></td>
+                            <td><span class="status-closed">Closed</span></td>
+                            <td></td>
+                            <td><span class="extension-no">No</span></td>
+                        </tr>
+                        <tr>
+                            <td>CAPA-2024-005</td>
+                            <td>Engineering</td>
+                            <td>David Wilson</td>
+                            <td>Review Design Control Procedures</td>
+                            <td class="days-remaining">22</td>
+                            <td><span class="status-open">Open</span></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="extension-no">No</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="foot">CAPA reports are updated in real-time. Use the export button to download detailed reports.</footer>
+        </main>
+    </div>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-panel">
+            <button class="close" id="closeModal">×</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.getElementById('exportCapa').addEventListener('click', () => {
+            window.open('/api/export-capa', '_blank');
+        });
+        document.getElementById('addCapa').addEventListener('click', () => {
+            alert('Add CAPA feature coming soon!');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Deviation Reports — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="modern.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <style>
+        .deviation-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .deviation-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--accent);
+        }
+        .deviation-subtitle {
+            font-size: 16px;
+            color: var(--muted);
+            margin: 0;
+        }
+        .deviation-table-container {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .deviation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .deviation-table th {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #021018;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .deviation-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text);
+        }
+        .deviation-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+            transition: background 0.2s ease;
+        }
+        .status-level {
+            font-weight: 600;
+        }
+        .status-level.minor {
+            color: #f59e0b;
+        }
+        .status-level.major {
+            color: #ef4444;
+        }
+        .status-level.critical {
+            color: #dc2626;
+        }
+        .closed-deviation {
+            background: rgba(34,197,94,0.1);
+            color: #22c55e;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .total-deviations {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .overdue-yes {
+            background: rgba(239,68,68,0.1);
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .overdue-no {
+            background: rgba(34,197,94,0.1);
+            color: #22c55e;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .open-count {
+            font-weight: 600;
+            color: #f59e0b;
+        }
+        @media (max-width: 768px) {
+            .deviation-table {
+                font-size: 12px;
+            }
+            .deviation-table th,
+            .deviation-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">FCC • ISV Change Portal</div>
+            <nav>
+                <a class="nav-link" href="user_dashboard.html">Dashboard</a>
+                <a class="nav-link active" href="#" data-action="deviation">Deviation Reports</a>
+            </nav>
+            <div class="sidebar-footer">Deviation • <span style="color:var(--muted)">Quality tracking</span></div>
+        </aside>
+
+        <main class="main-content">
+            <header class="bar">
+                <div class="bar-left">
+                    <h1>Deviation Reports</h1>
+                    <p class="muted">Track deviations and quality incidents across departments.</p>
+                </div>
+                <div class="bar-right">
+                    <button id="exportDeviation">Export CSV</button>
+                    <button id="addDeviation">Add Deviation</button>
+                </div>
+            </header>
+
+            <div class="deviation-header">
+                <h2 class="deviation-title">October 2024</h2>
+                <p class="deviation-subtitle">Deviation Status Overview</p>
+            </div>
+
+            <div class="deviation-table-container">
+                <table class="deviation-table">
+                    <thead>
+                        <tr>
+                            <th>Month-Year</th>
+                            <th>Responsible Person</th>
+                            <th>Description</th>
+                            <th>Deviation Status Level</th>
+                            <th>Closed Deviation</th>
+                            <th>Total Deviations</th>
+                            <th>Is Overdue</th>
+                            <th>Deviation Open Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>October 2024</td>
+                            <td>John Smith</td>
+                            <td>Batch testing procedure deviation in QA lab</td>
+                            <td class="status-level minor">Minor</td>
+                            <td><span class="closed-deviation">Closed</span></td>
+                            <td class="total-deviations">15</td>
+                            <td><span class="overdue-no">No</span></td>
+                            <td class="open-count">2</td>
+                        </tr>
+                        <tr>
+                            <td>October 2024</td>
+                            <td>Sarah Johnson</td>
+                            <td>Equipment calibration schedule delay</td>
+                            <td class="status-level major">Major</td>
+                            <td></td>
+                            <td class="total-deviations">8</td>
+                            <td><span class="overdue-yes">Yes</span></td>
+                            <td class="open-count">3</td>
+                        </tr>
+                        <tr>
+                            <td>October 2024</td>
+                            <td>Mike Davis</td>
+                            <td>Document control process non-compliance</td>
+                            <td class="status-level critical">Critical</td>
+                            <td><span class="closed-deviation">Closed</span></td>
+                            <td class="total-deviations">22</td>
+                            <td><span class="overdue-no">No</span></td>
+                            <td class="open-count">1</td>
+                        </tr>
+                        <tr>
+                            <td>October 2024</td>
+                            <td>Emily Chen</td>
+                            <td>Supplier quality audit findings</td>
+                            <td class="status-level minor">Minor</td>
+                            <td><span class="closed-deviation">Closed</span></td>
+                            <td class="total-deviations">12</td>
+                            <td><span class="overdue-no">No</span></td>
+                            <td class="open-count">0</td>
+                        </tr>
+                        <tr>
+                            <td>October 2024</td>
+                            <td>David Wilson</td>
+                            <td>Design control procedure review</td>
+                            <td class="status-level major">Major</td>
+                            <td></td>
+                            <td class="total-deviations">18</td>
+                            <td><span class="overdue-yes">Yes</span></td>
+                            <td class="open-count">4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="foot">Deviation reports are updated in real-time. Use the export button to download detailed reports.</footer>
+        </main>
+    </div>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-panel">
+            <button class="close" id="closeModal">×</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.getElementById('exportDeviation').addEventListener('click', () => {
+            window.open('/api/export-deviation', '_blank');
+        });
+        document.getElementById('addDeviation').addEventListener('click', () => {
+            alert('Add Deviation feature coming soon!');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+*{box-sizing:border-box;font-family:Segoe UI,Roboto,Arial,sans-serif}
+body{max-width:980px;margin:18px auto;padding:12px;color:#222}
+header h1{margin:0 0 6px}header p{margin:0 0 18px;color:#444}
+form label{display:block;margin:8px 0}input,select,textarea{width:100%;padding:6px;margin-top:4px}
+textarea{min-height:80px}
+.actions{margin-top:12px}
+button{padding:8px 12px;margin-right:8px}
+.tabs{margin:12px 0}
+.tab{display:none}
+.tab.active{display:block}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+#adminList .card{border:1px solid #ddd;padding:8px;margin:8px 0;border-radius:4px}
+.status-badge{padding:4px 8px;border-radius:4px;background:#eee;margin-left:8px}
+footer{margin-top:24px;color:#666}

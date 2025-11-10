@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Welcome — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <style>
+      /* Hero tweaks for the welcome page */
+      .welcome-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:48px;border-radius:16px;background:linear-gradient(90deg, rgba(6,182,212,0.06), rgba(124,58,237,0.04));margin-bottom:18px}
+      .hero-left{max-width:680px}
+      .hero-title{font-size:36px;margin:0 0 8px}
+      .hero-sub{color:var(--muted);margin:0 0 18px}
+      .cta-row{display:flex;gap:12px}
+      .cta-primary{padding:14px 18px;border-radius:12px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021018;font-weight:700;cursor:pointer}
+      .cta-ghost{padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer}
+      .hero-right{min-width:260px;display:flex;align-items:center;justify-content:center}
+      .welcome-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;width:100%;text-align:center}
+      .app-links{display:flex;gap:8px;justify-content:center;margin-top:12px}
+      .small-note{font-size:13px;color:var(--muted);margin-top:8px}
+      .quick-card:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,0,0,0.15)}
+    </style>
+  </head>
+  <body>
+    <div style="padding:28px;max-width:1100px;margin:28px auto;color:inherit">
+      <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--accent)">FCC • ISV Change Portal</div>
+      </header>
+
+      <section class="welcome-hero">
+        <div class="hero-left">
+          <h1 class="hero-title">Welcome to the ISV Change Control Portal</h1>
+          <p class="hero-sub">A friendly demo for change control requests. Submit, review and export change requests. This prototype shows how a SharePoint + Power Platform implementation could work.</p>
+        </div>
+      </section>
+
+      <section style="display:grid;grid-template-columns:1fr;gap:12px">
+        <div style="background:var(--card);padding:18px;border-radius:12px">
+          <h3 style="margin-top:0">Quick Start</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:16px;margin-top:12px">
+            <a href="change_control.html" class="quick-card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), rgba(6,182,212,0.05));border:1px solid rgba(6,182,212,0.2);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all 0.3s ease">
+              <i class="ti ti-settings" style="font-size:24px;color:#06b6d4;margin-bottom:8px"></i>
+              <span style="font-weight:600">Request a Change Control</span>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px">Manage system changes</span>
+            </a>
+            <a href="risk_assessment.html" class="quick-card" style="background:linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all 0.3s ease">
+              <i class="ti ti-alert-triangle" style="font-size:24px;color:#f59e0b;margin-bottom:8px"></i>
+              <span style="font-weight:600">Request a Risk Assessment</span>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px">Evaluate potential risks</span>
+            </a>
+            <a href="incident.html" class="quick-card" style="background:linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all 0.3s ease">
+              <i class="ti ti-exclamation-circle" style="font-size:24px;color:#ef4444;margin-bottom:8px"></i>
+              <span style="font-weight:600">Request an Incident</span>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px">Report system incidents</span>
+            </a>
+            <a href="user_dashboard.html" class="quick-card" style="background:linear-gradient(135deg, rgba(124,58,237,0.1), rgba(124,58,237,0.05));border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all 0.3s ease">
+              <i class="ti ti-dashboard" style="font-size:24px;color:#7c3aed;margin-bottom:8px"></i>
+              <span style="font-weight:600">Dashboard</span>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px">View your requests</span>
+            </a>
+            <a href="/api/export" class="quick-card" style="background:linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.05));border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;text-align:center;transition:all 0.3s ease">
+              <i class="ti ti-download" style="font-size:24px;color:#22c55e;margin-bottom:8px"></i>
+              <span style="font-weight:600">Download Sample CSV</span>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px">Export sample data</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Modal container uses existing modal classes from style.css -->
+    <div id="authModal" class="modal hidden">
+      <div class="modal-panel">
+        <button class="close" id="closeAuth">×</button>
+        <div id="authContent"></div>
+      </div>
+    </div>
+
+    <script src="welcome.js"></script>
+  </body>
+</html>

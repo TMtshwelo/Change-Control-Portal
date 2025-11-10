@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Request a Risk Assessment — ISV Change Control Portal</title>
+    <link rel="stylesheet" href="modern.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.30.0/tabler-icons.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .welcome-banner {
+            background: linear-gradient(90deg, var(--surface), rgba(14, 165, 233, 0.1));
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">FCC • ISV Change Portal</div>
+            <nav>
+                <a class="nav-link" href="welcome.html">Home</a>
+                <a class="nav-link active" href="#" data-action="risk_assessment">Request Risk Assessment</a>
+            </nav>
+            <div class="sidebar-footer">Logged in as <span id="profileName" class="profile-pill">Guest</span></div>
+        </aside>
+
+        <main class="main-content" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+            <div>
+                <header class="bar">
+                    <div class="bar-left">
+                        <h1>Request a Risk Assessment</h1>
+                        <p class="muted">Please complete all fields to initiate a risk evaluation</p>
+                        <div id="timestamp" style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;"></div>
+                    </div>
+                    <div class="bar-right">
+                        <button id="backToWelcome">Back to Welcome</button>
+                    </div>
+                </header>
+
+                <div>
+                    <form id="riskAssessmentForm" style="background: var(--card); padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                        <h3>Risk Assessment Form</h3>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="requestedBy">Requested By:</label>
+                            <input type="text" id="requestedBy" readonly style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="dateOfRequest">Date of Request:</label>
+                            <input type="date" id="dateOfRequest" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="systemProcess">System or Process Involved:</label>
+                            <input type="text" id="systemProcess" placeholder="Specify what the risk applies to" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="riskCategory">Change Category:</label>
+                            <select id="riskCategory" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                                <option value="">Select Category</option>
+                                <option value="Operational">Minor</option>
+                                <option value="Compliance">Major</option>
+                                <option value="Security">Emergency</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="riskDescription">Risk Description:</label>
+                            <textarea id="riskDescription" rows="4" placeholder="Detailed explanation of the potential risk" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="potentialImpact">Potential Impact:</label>
+                            <select id="potentialImpact" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                                <option value="">Select Impact</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="likelihood">Likelihood of Occurrence:</label>
+                            <select id="likelihood" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                                <option value="">Select Likelihood</option>
+                                <option value="Rare">Rare</option>
+                                <option value="Possible">Possible</option>
+                                <option value="Likely">Likely</option>
+                                <option value="Frequent">Frequent</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="mitigation">Mitigation Measures Proposed:</label>
+                            <textarea id="mitigation" rows="4" placeholder="What actions are suggested to reduce risk" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label for="supportingDocs">Upload Supporting Documents:</label>
+                            <input type="file" id="supportingDocs" multiple style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                        </div>
+
+                        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer;">Submit</button>
+                    </form>
+                </div>
+
+                <footer class="foot">This is a demo page.</footer>
+            </div>
+
+            <aside style="background: var(--card); padding: 1.5rem; border-radius: 12px; height: fit-content;">
+                <h4>Risk Assessment Guidelines</h4>
+                <p><a href="#" style="color: var(--accent);">View SOP Document</a></p>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('backToWelcome').addEventListener('click', () => {
+            window.location.href = 'welcome.html';
+        });
+        const profileName = document.getElementById('profileName');
+        const user = sessionStorage.getItem('demoUser') || 'Guest';
+        profileName.textContent = user;
+
+        // Auto-fill requestedBy
+        document.getElementById('requestedBy').value = user;
+
+        // Auto-fill timestamp
+        const now = new Date();
+        document.getElementById('timestamp').textContent = `Timestamp: ${now.toLocaleString()}`;
+
+        // Form submission
+        document.getElementById('riskAssessmentForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Risk Assessment submitted successfully! (Demo - data not saved)');
+        });
+    </script>
+</body>
+</html>

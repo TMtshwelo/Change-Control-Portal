@@ -1,0 +1,39 @@
+{
+  "$schema": "https://pnp.github.io/pnp-provisioning-schema/schemas/settings.schema.json",
+  "Template": {
+    "ProvisioningTemplate": {
+      "Metadata": { "Title": "ISV Change Requests list (provisioning)" },
+      "Lists": [
+        {
+          "Title": "ISV Change Requests",
+          "TemplateType": 100,
+          "Description": "List to store ISV change requests",
+          "Fields": [
+            { "SchemaXml": "<Field Type='Text' Name='RequestID' DisplayName='Request ID' Required='TRUE'/>" },
+            { "SchemaXml": "<Field Type='Text' Name='RequestorName' DisplayName='Requestor Name'/>" },
+            { "SchemaXml": "<Field Type='Text' Name='RequestorEmail' DisplayName='Requestor Email'/>" },
+            { "SchemaXml": "<Field Type='Choice' Name='Department' DisplayName='Department'><CHOICES><CHOICE>ISV</CHOICE><CHOICE>QA</CHOICE><CHOICE>Ops</CHOICE><CHOICE>R&D</CHOICE><CHOICE>Other</CHOICE></CHOICES></Field>" },
+            { "SchemaXml": "<Field Type='Text' Name='Summary' DisplayName='Summary'/>" },
+            { "SchemaXml": "<Field Type='Note' Name='Description' DisplayName='Description'/>" },
+            { "SchemaXml": "<Field Type='Choice' Name='ChangeType' DisplayName='Change Type'><CHOICES><CHOICE>Bug Fix</CHOICE><CHOICE>Enhancement</CHOICE><CHOICE>Config Change</CHOICE><CHOICE>Hotfix</CHOICE><CHOICE>Other</CHOICE></CHOICES></Field>" },
+            { "SchemaXml": "<Field Type='Choice' Name='Priority' DisplayName='Priority'><CHOICES><CHOICE>Low</CHOICE><CHOICE>Medium</CHOICE><CHOICE>High</CHOICE><CHOICE>Critical</CHOICE></CHOICES></Field>" },
+            { "SchemaXml": "<Field Type='Choice' Name='Status' DisplayName='Status' Default='Pending'><CHOICES><CHOICE>Pending</CHOICE><CHOICE>Under Review</CHOICE><CHOICE>Approved</CHOICE><CHOICE>Rejected</CHOICE><CHOICE>Implemented</CHOICE></CHOICES></Field>" },
+            { "SchemaXml": "<Field Type='User' Name='AssignedTo' DisplayName='Assigned To'/>" },
+            { "SchemaXml": "<Field Type='User' Name='Reviewer' DisplayName='Reviewer'/>" },
+            { "SchemaXml": "<Field Type='DateTime' Name='SubmittedDate' DisplayName='Submitted Date'/>" },
+            { "SchemaXml": "<Field Type='DateTime' Name='TargetDate' DisplayName='Target Implementation Date'/>" },
+            { "SchemaXml": "<Field Type='URL' Name='Documents' DisplayName='Documents'/>" },
+            { "SchemaXml": "<Field Type='Text' Name='SpiceWaxRef' DisplayName='Spice Wax Reference'/>" },
+            { "SchemaXml": "<Field Type='Note' Name='AuditLog' DisplayName='Audit Log'/>" },
+            { "SchemaXml": "<Field Type='Note' Name='Comments' DisplayName='Comments'/>" }
+          ],
+          "Views": [
+            { "Title": "All Requests", "ViewFields": ["RequestID","Title","RequestorName","Department","Status","Priority","SubmittedDate","AssignedTo"] },
+            { "Title": "Pending-Under Review", "Query": "<Where><Or><Eq><FieldRef Name='Status'/><Value Type='Text'>Pending</Value></Eq><Eq><FieldRef Name='Status'/><Value Type='Text'>Under Review</Value></Eq></Or></Where>", "ViewFields": ["RequestID","Title","Status","Reviewer","SubmittedDate"] },
+            { "Title": "My Assigned", "Query": "<Where><Eq><FieldRef Name='AssignedTo'/><Value Type='Integer'><UserID/></Value></Eq></Where>", "ViewFields": ["RequestID","Title","Status","Priority","TargetDate"] }
+          ]
+        }
+      ]
+    }
+  }
+}
