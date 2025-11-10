@@ -6,6 +6,12 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const cors = require('cors');
+const multer = require('multer');
+
+// Import services
+const sharePointService = require('./services/sharePointService');
+const notificationService = require('./services/notificationService');
+const oneDriveService = require('./services/oneDriveService');
 
 const DB_FILE = path.join(__dirname, 'requests.db');
 const staticDir = path.join(__dirname, 'node_demo');
@@ -63,16 +69,55 @@ db.serialize(() => {
 app.use('/', express.static(staticDir, { index: 'welcome.html' }));
 
 // API: create request
-app.post('/api/requests', (req, res) => {
-  const r = req.body;
-  const stmt = db.prepare(`INSERT INTO requests (requestId,title,requestorName,requestorEmail,department,summary,description,changeType,priority,targetDate,documents,spiceWaxRef,status,assignedTo,reviewer,submittedDate,comments,initiator,requestedBy,dateRequested,systemName,policyFormComplete,sopTrainingComplete,briefDescription) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  const requestId = r.requestId || ('REQ-' + Date.now().toString().slice(-6));
-  const vals = [requestId, r.title, r.requestorName, r.requestorEmail, r.department, r.summary, r.description, r.changeType, r.priority, r.targetDate, r.documents, r.spiceWaxRef, r.status || 'Pending', r.assignedTo || '', r.reviewer || '', r.submittedDate || new Date().toISOString(), r.comments || '', r.initiator || '', r.requestedBy || r.requestorName || '', r.dateRequested || r.submittedDate || new Date().toISOString(), r.systemName || '', r.policyFormComplete?1:0, r.sopTrainingComplete?1:0, r.briefDescription || ''];
-  stmt.run(vals, function(err){
-    if(err) return res.status(500).json({error:err.message});
-    res.json({id: this.lastID, requestId});
-  });
-  stmt.finalize();
+app.post('/api/requests', async (req, res) => {
+  try {
+    const r = req.body;
+    const stmt = db.prepare(`INSERT INTO requests (requestId,title,requestorName,requestorEmail,department,summary,description,changeType,priority,targetDate,documents,spiceWaxRef,status,assignedTo,reviewer,submittedDate,comments,initiator,requestedBy,dateRequested,systemName,policyFormComplete,sopTrainingComplete,briefDescription) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+    const requestId = r.requestId || ('REQ-' + Date.now().toString().slice(-6));
+    const vals = [requestId, r.title, r.requestorName, r.requestorEmail, r.department, r.summary, r.description, r.changeType, r.priority, r.targetDate, r.documents, r.spiceWaxRef, r.status || 'Pending', r.assignedTo || '', r.reviewer || '', r.submittedDate || new Date().toISOString(), r.comments || '', r.initiator || '', r.requestedBy || r.requestorName || '', r.dateRequested || r.submittedDate || new Date().toISOString(), r.systemName || '', r.policyFormComplete?1:0, r.sopTrainingComplete?1:0, r.briefDescription || ''];
+
+    stmt.run(vals, async function(err){
+      if(err) return res.status(500).json({error:err.message});
+
+      // Sync to SharePoint
+      try {
+        await sharePointService.createChangeRequest({
+          title: r.title,
+          requestId: requestId,
+          requestorName: r.requestorName,
+          requestorEmail: r.requestorEmail,
+          department: r.department,
+          summary: r.summary,
+          description: r.description,
+          changeType: r.changeType,
+          priority: r.priority,
+          status: r.status || 'Pending',
+          submittedDate: r.submittedDate || new Date().toISOString()
+        });
+      } catch (spError) {
+        console.error('SharePoint sync failed:', spError);
+        // Continue with response even if SharePoint fails
+      }
+
+      // Send Teams notification
+      try {
+        await notificationService.sendTeamsNotification({
+          title: r.title,
+          status: r.status || 'Pending',
+          priority: r.priority
+        });
+      } catch (teamsError) {
+        console.error('Teams notification failed:', teamsError);
+        // Continue with response even if notification fails
+      }
+
+      res.json({id: this.lastID, requestId});
+    });
+    stmt.finalize();
+  } catch (error) {
+    console.error('Error creating request:', error);
+    res.status(500).json({error: error.message});
+  }
 });
 
 // API: list requests
@@ -94,18 +139,37 @@ app.get('/api/requests', (req, res) => {
 });
 
 // API: update request by requestId
-app.put('/api/requests/:requestId', (req,res)=>{
-  const rid = req.params.requestId;
-  const r = req.body;
-  const fields = [];
-  const values = [];
-  for(const k of ['status','assignedTo','comments','reviewer','initiator','requestedBy','dateRequested','systemName','policyFormComplete','sopTrainingComplete']){
-    if(r[k]!==undefined){ fields.push(`${k}=?`); values.push(r[k]); }
+app.put('/api/requests/:requestId', async (req,res)=>{
+  try {
+    const rid = req.params.requestId;
+    const r = req.body;
+    const fields = [];
+    const values = [];
+    for(const k of ['status','assignedTo','comments','reviewer','initiator','requestedBy','dateRequested','systemName','policyFormComplete','sopTrainingComplete']){
+      if(r[k]!==undefined){ fields.push(`${k}=?`); values.push(r[k]); }
+    }
+    if(fields.length===0) return res.status(400).json({error:'no updatable fields'});
+    values.push(rid);
+    const sql = `UPDATE requests SET ${fields.join(', ')} WHERE requestId=?`;
+    db.run(sql, values, async function(err){
+      if(err) return res.status(500).json({error:err.message});
+
+      // Sync status update to SharePoint if status changed
+      if(r.status) {
+        try {
+          await sharePointService.updateChangeRequest(rid, { Status: r.status });
+        } catch (spError) {
+          console.error('SharePoint update failed:', spError);
+          // Continue with response even if SharePoint fails
+        }
+      }
+
+      res.json({changes:this.changes});
+    });
+  } catch (error) {
+    console.error('Error updating request:', error);
+    res.status(500).json({error: error.message});
   }
-  if(fields.length===0) return res.status(400).json({error:'no updatable fields'});
-  values.push(rid);
-  const sql = `UPDATE requests SET ${fields.join(', ')} WHERE requestId=?`;
-  db.run(sql, values, function(err){ if(err) return res.status(500).json({error:err.message}); res.json({changes:this.changes}); });
 });
 
 // API: export requests as CSV for audit
@@ -145,6 +209,206 @@ app.get('/api/schema', (req, res) => {
     if(err) return res.status(500).json({error:err.message});
     res.json(rows);
   });
+});
+
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
+
+// API: upload document to OneDrive
+app.post('/api/upload/:requestId', upload.single('file'), async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const result = await oneDriveService.uploadDocument(file, requestId);
+    res.json({ success: true, fileId: result.id, fileName: file.originalname });
+  } catch (error) {
+    console.error('Upload failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: get documents for a request
+app.get('/api/documents/:requestId', async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const documents = await oneDriveService.getDocuments(requestId);
+    res.json(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Power Automate Integration Endpoints
+
+// Webhook endpoint for Power Automate approval notifications
+app.post('/api/webhooks/powerautomate/approval', async (req, res) => {
+  try {
+    const { requestId, outcome, approver, comments } = req.body;
+
+    // Update request status based on approval outcome
+    const status = outcome === 'Approve' ? 'Approved' : 'Rejected';
+
+    // Update in database
+    db.run(`UPDATE requests SET status=?, comments=? WHERE requestId=?`,
+      [status, comments || '', requestId], async function(err) {
+        if (err) {
+          console.error('Database update failed:', err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        // Sync to SharePoint
+        try {
+          await sharePointService.updateChangeRequest(requestId, {
+            Status: status,
+            Comments: comments || ''
+          });
+        } catch (spError) {
+          console.error('SharePoint sync failed:', spError);
+        }
+
+        // Send notification to requestor
+        try {
+          const request = await new Promise((resolve, reject) => {
+            db.get(`SELECT * FROM requests WHERE requestId=?`, [requestId], (err, row) => {
+              if (err) reject(err);
+              else resolve(row);
+            });
+          });
+
+          await notificationService.sendEmailNotification({
+            to: request.requestorEmail,
+            subject: `Change Request ${requestId} ${status}`,
+            body: `Your change request "${request.title}" has been ${status.toLowerCase()}.${comments ? `\n\nComments: ${comments}` : ''}`
+          });
+        } catch (emailError) {
+          console.error('Email notification failed:', emailError);
+        }
+
+        res.json({ success: true, changes: this.changes });
+      });
+  } catch (error) {
+    console.error('Approval webhook error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint for Power Automate to trigger implementation status
+app.post('/api/powerautomate/implement/:requestId', async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+
+    // Update status to Implemented
+    db.run(`UPDATE requests SET status='Implemented' WHERE requestId=?`,
+      [requestId], async function(err) {
+        if (err) {
+          console.error('Database update failed:', err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        // Sync to SharePoint
+        try {
+          await sharePointService.updateChangeRequest(requestId, {
+            Status: 'Implemented'
+          });
+        } catch (spError) {
+          console.error('SharePoint sync failed:', spError);
+        }
+
+        res.json({ success: true, changes: this.changes });
+      });
+  } catch (error) {
+    console.error('Implementation trigger error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Power Apps Integration Endpoints
+
+// Endpoint for Power Apps to submit change requests directly
+app.post('/api/powerapps/submit', async (req, res) => {
+  try {
+    const r = req.body;
+
+    // Create in database
+    const stmt = db.prepare(`INSERT INTO requests (requestId,title,requestorName,requestorEmail,department,summary,description,changeType,priority,targetDate,documents,spiceWaxRef,status,assignedTo,reviewer,submittedDate,comments,initiator,requestedBy,dateRequested,systemName,policyFormComplete,sopTrainingComplete,briefDescription) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+    const requestId = r.requestId || ('REQ-' + Date.now().toString().slice(-6));
+    const vals = [requestId, r.title, r.requestorName, r.requestorEmail, r.department, r.summary, r.description, r.changeType, r.priority, r.targetDate, r.documents, r.spiceWaxRef, r.status || 'Pending', r.assignedTo || '', r.reviewer || '', r.submittedDate || new Date().toISOString(), r.comments || '', r.initiator || '', r.requestedBy || r.requestorName || '', r.dateRequested || r.submittedDate || new Date().toISOString(), r.systemName || '', r.policyFormComplete?1:0, r.sopTrainingComplete?1:0, r.briefDescription || ''];
+
+    stmt.run(vals, async function(err){
+      if(err) return res.status(500).json({error:err.message});
+
+      // Sync to SharePoint
+      try {
+        await sharePointService.createChangeRequest({
+          title: r.title,
+          requestId: requestId,
+          requestorName: r.requestorName,
+          requestorEmail: r.requestorEmail,
+          department: r.department,
+          summary: r.summary,
+          description: r.description,
+          changeType: r.changeType,
+          priority: r.priority,
+          status: r.status || 'Pending',
+          submittedDate: r.submittedDate || new Date().toISOString()
+        });
+      } catch (spError) {
+        console.error('SharePoint sync failed:', spError);
+      }
+
+      // Send Teams notification
+      try {
+        await notificationService.sendTeamsNotification({
+          title: r.title,
+          status: r.status || 'Pending',
+          priority: r.priority
+        });
+      } catch (teamsError) {
+        console.error('Teams notification failed:', teamsError);
+      }
+
+      res.json({id: this.lastID, requestId});
+    });
+    stmt.finalize();
+  } catch (error) {
+    console.error('Power Apps submit error:', error);
+    res.status(500).json({error: error.message});
+  }
+});
+
+// Endpoint for Power Apps to get form data/options
+app.get('/api/powerapps/formdata', (req, res) => {
+  const formData = {
+    departments: ["Information Systems","Validation","Human Resources","Finance","Regulatory Affairs","Procurement","Operational Health and Safety","Commercial","Quality Assurance","Quality Control","Production","Engineering","Research and Development","Analytical Development","Supply Chain","Other"],
+    changeTypes: ["Bug Fix","Enhancement","Config Change","Hotfix","Other"],
+    priorities: ["Low","Medium","High","Critical"],
+    systems: ["Core System","Validation System","QA System","Other"]
+  };
+  res.json(formData);
+});
+
+// Endpoint for Power Apps to upload attachments
+app.post('/api/powerapps/upload/:requestId', upload.single('file'), async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const result = await oneDriveService.uploadDocument(file, requestId);
+    res.json({ success: true, fileId: result.id, fileName: file.originalname });
+  } catch (error) {
+    console.error('Power Apps upload failed:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

@@ -7,7 +7,7 @@ async function sendTeamsNotification(changeRequest) {
                 content: `New change request: ${changeRequest.title}\nStatus: ${changeRequest.status}\nPriority: ${changeRequest.priority}`
             }
         };
-        
+
         await graphClient.api(`/teams/${process.env.TEAMS_TEAM_ID}/channels/${process.env.TEAMS_CHANNEL_ID}/messages`)
             .post(message);
     } catch (error) {
@@ -16,7 +16,7 @@ async function sendTeamsNotification(changeRequest) {
     }
 }
 
-async function sendEmailNotification(to, subject, body) {
+async function sendEmailNotification({ to, subject, body }) {
     try {
         const mail = {
             message: {
@@ -34,7 +34,7 @@ async function sendEmailNotification(to, subject, body) {
                 ]
             }
         };
-        
+
         await graphClient.api('/me/sendMail')
             .post(mail);
     } catch (error) {
