@@ -1,11 +1,45 @@
-const { spfi } = require('@pnp/sp');
-const { SPFx } = require('@pnp/sp/behaviors/spfx');
+const axios = require('axios');
+const https = require('https');
 
-const sp = spfi(process.env.SHAREPOINT_SITE_URL).using(SPFx());
+// SharePoint REST API configuration for on-premises
+const SHAREPOINT_CONFIG = {
+    siteUrl: process.env.SHAREPOINT_SITE_URL || 'https://your-sharepoint-server/sites/changecontrol',
+    listName: process.env.SHAREPOINT_LIST_NAME || 'ISV Change Requests',
+    username: process.env.SHAREPOINT_USERNAME,
+    password: process.env.SHAREPOINT_PASSWORD,
+    domain: process.env.SHAREPOINT_DOMAIN
+};
+
+// Create axios instance with SharePoint configuration
+const spClient = axios.create({
+    baseURL: SHAREPOINT_CONFIG.siteUrl,
+    httpsAgent: new https.Agent({
+        rejectUnauthorized: false // For on-premises with self-signed certificates
+    }),
+    headers: {
+        'Accept': 'application/json;odata=verbose',
+        'Content-Type': 'application/json;odata=verbose'
+    }
+});
+
+// Authenticate with SharePoint (NTLM or Basic Auth)
+async function authenticate() {
+    if (SHAREPOINT_CONFIG.username && SHAREPOINT_CONFIG.password) {
+        // For on-premises SharePoint, you might need to configure NTLM authentication
+        // This is a basic implementation - you may need to adjust based on your auth method
+        spClient.defaults.auth = {
+            username: SHAREPOINT_CONFIG.username,
+            password: SHAREPOINT_CONFIG.password
+        };
+    }
+}
 
 async function createChangeRequest(data) {
     try {
-        const result = await sp.web.lists.getByTitle(process.env.SHAREPOINT_LIST_NAME).items.add({
+        await authenticate();
+
+        const requestData = {
+            __metadata: { type: 'SP.Data.ISVChangeRequestsListItem' },
             Title: data.title,
             RequestID: data.requestId,
             RequestorName: data.requestorName,
@@ -17,32 +51,117 @@ async function createChangeRequest(data) {
             Priority: data.priority,
             Status: "Pending",
             SubmittedDate: new Date().toISOString()
-        });
-        return result;
+        };
+
+        const response = await spClient.post(
+            `/_api/web/lists/getbytitle('${SHAREPOINT_CONFIG.listName}')/items`,
+            requestData
+        );
+
+        return {
+            id: response.data.d.Id,
+            ...response.data.d
+        };
     } catch (error) {
-        console.error('Error creating SharePoint item:', error);
+        console.error('Error creating SharePoint item:', error.response?.data || error.message);
         throw error;
     }
 }
 
 async function updateChangeRequest(id, data) {
     try {
-        const result = await sp.web.lists.getByTitle(process.env.SHAREPOINT_LIST_NAME).items.getById(id).update(data);
-        return result;
+        await authenticate();
+
+        const updateData = {
+            __metadata: { type: 'SP.Data.ISVChangeRequestsListItem' },
+            ...data
+        };
+
+        const response = await spClient.post(
+            `/_api/web/lists/getbytitle('${SHAREPOINT_CONFIG.listName}')/items(${id})`,
+            {
+                ...updateData,
+                '__metadata': { type: 'SP.Data.ISVChangeRequestsListItem' }
+            },
+            {
+                headers: {
+                    'X-HTTP-Method': 'MERGE',
+                    'If-Match': '*'
+                }
+            }
+        );
+
+        return response.data;
     } catch (error) {
-        console.error('Error updating SharePoint item:', error);
+        console.error('Error updating SharePoint item:', error.response?.data || error.message);
         throw error;
     }
 }
 
 async function getChangeRequests(filter = '') {
     try {
-        const items = await sp.web.lists.getByTitle(process.env.SHAREPOINT_LIST_NAME).items
-            .filter(filter)
-            .get();
-        return items;
+        await authenticate();
+
+        let url = `/_api/web/lists/getbytitle('${SHAREPOINT_CONFIG.listName}')/items?$select=Id,Title,RequestID,RequestorName,RequestorEmail,Department,Summary,Description,ChangeType,Priority,Status,SubmittedDate,ApprovedDate,RejectedDate,Comments&$orderby=Id desc`;
+
+        if (filter) {
+            url += `&$filter=${encodeURIComponent(filter)}`;
+        }
+
+        const response = await spClient.get(url);
+
+        // Transform SharePoint response to consistent format
+        return response.data.d.results.map(item => ({
+            id: item.Id,
+            title: item.Title,
+            requestId: item.RequestID,
+            requestorName: item.RequestorName,
+            requestorEmail: item.RequestorEmail,
+            department: item.Department,
+            summary: item.Summary,
+            description: item.Description,
+            changeType: item.ChangeType,
+            priority: item.Priority,
+            status: item.Status,
+            submittedDate: item.SubmittedDate,
+            approvedDate: item.ApprovedDate,
+            rejectedDate: item.RejectedDate,
+            comments: item.Comments
+        }));
     } catch (error) {
-        console.error('Error fetching SharePoint items:', error);
+        console.error('Error fetching SharePoint items:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+async function getChangeRequestById(id) {
+    try {
+        await authenticate();
+
+        const response = await spClient.get(
+            `/_api/web/lists/getbytitle('${SHAREPOINT_CONFIG.listName}')/items(${id})`
+        );
+
+        const item = response.data.d;
+        return {
+            id: item.Id,
+            title: item.Title,
+            requestId: item.RequestID,
+            requestorName: item.RequestorName,
+            requestorEmail: item.RequestorEmail,
+            department: item.Department,
+            summary: item.Summary,
+            description: item.Description,
+            changeType: item.ChangeType,
+            priority: item.Priority,
+            status: item.Status,
+            submittedDate: item.SubmittedDate,
+            approvedDate: item.ApprovedDate,
+            rejectedDate: item.RejectedDate,
+            comments: item.Comments
+        };
+    } catch (error) {
+        console.error('Error fetching SharePoint item:', error.response?.data || error.message);
         throw error;
     }
 }
@@ -50,5 +169,6 @@ async function getChangeRequests(filter = '') {
 module.exports = {
     createChangeRequest,
     updateChangeRequest,
-    getChangeRequests
+    getChangeRequests,
+    getChangeRequestById
 };
