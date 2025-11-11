@@ -188,17 +188,26 @@ app.get('/api/export', (req, res) => {
   const sql = `SELECT ${cols.join(',')} FROM requests ${where} ORDER BY id DESC`;
   db.all(sql, params, (err, rows)=>{
     if(err) return res.status(500).json({error:err.message});
-    // Build CSV
-    const header = cols.join(',') + '\n';
+    // Build CSV with proper Excel table formatting
+    const BOM = '\uFEFF'; // UTF-8 BOM for Excel
+    const header = cols.map(col => `"${col}"`).join(',') + '\n'; // Quote all headers
     const escape = (v) => {
-      if(v===null || v===undefined) return '';
-      const s = v.toString().replace(/"/g,'""');
-      return '"' + s + '"';
+      if(v===null || v===undefined) return '""';
+      const s = v.toString().replace(/"/g,'""'); // Escape quotes by doubling them
+      // Quote fields that contain commas, quotes, or newlines
+      if(s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+        return '"' + s + '"';
+      }
+      return s;
     };
     const lines = rows.map(r => cols.map(c => escape(r[c])).join(','));
-    const csv = header + lines.join('\n');
+    const csv = BOM + header + lines.join('\n');
     res.setHeader('Content-Type','text/csv; charset=utf-8');
     res.setHeader('Content-Disposition','attachment; filename="isv-change-requests.csv"');
+    res.setHeader('Cache-Control','no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma','no-cache');
+    res.setHeader('Expires','0');
+    res.setHeader('X-Content-Type-Options','nosniff');
     res.send(csv);
   });
 });

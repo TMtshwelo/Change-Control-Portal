@@ -314,13 +314,11 @@
                 const data = await response.json();
                 allRequests = data;
                 renderTable(allRequests);
-                updateSummary(allRequests);
                 updateLastSynced();
             } catch (error) {
                 console.error('Error fetching requests:', error);
                 // Fallback to static data if API fails
                 renderStaticTable();
-                updateSummaryFromTable();
             }
         }
 
@@ -486,7 +484,6 @@
             });
 
             renderTable(filteredRequests);
-            updateSummary(filteredRequests);
         }
 
         filterType.addEventListener('change', filterTable);
@@ -496,39 +493,7 @@
         dateTo.addEventListener('change', filterTable);
         search.addEventListener('input', filterTable);
 
-        // Update summary counts
-        function updateSummary(requests) {
-            let total = requests.length;
-            let pending = requests.filter(r => r.status === 'Pending').length;
-            let approved = requests.filter(r => r.status === 'Approved').length;
-            let rejected = requests.filter(r => r.status === 'Rejected').length;
-
-            document.getElementById('totalRequests').textContent = total;
-            document.getElementById('pendingRequests').textContent = pending;
-            document.getElementById('approvedRequests').textContent = approved;
-            document.getElementById('rejectedRequests').textContent = rejected;
-        }
-
-        // Fallback summary from static table
-        function updateSummaryFromTable() {
-            const rows = document.querySelectorAll('.dashboard-table tbody tr');
-            let total = rows.length;
-            let pending = 0;
-            let approved = 0;
-            let rejected = 0;
-
-            rows.forEach(row => {
-                const statusCell = row.cells[0].textContent.trim();
-                if (statusCell.includes('Pending')) pending++;
-                else if (statusCell.includes('Approved')) approved++;
-                else if (statusCell.includes('Rejected')) rejected++;
-            });
-
-            document.getElementById('totalRequests').textContent = total;
-            document.getElementById('pendingRequests').textContent = pending;
-            document.getElementById('approvedRequests').textContent = approved;
-            document.getElementById('rejectedRequests').textContent = rejected;
-        }
+        // Summary functions removed for user dashboard
 
         // Load data on page load
         fetchRequests();

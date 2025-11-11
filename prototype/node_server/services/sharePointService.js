@@ -166,9 +166,30 @@ async function getChangeRequestById(id) {
     }
 }
 
+async function testConnection() {
+    try {
+        await authenticate();
+
+        const response = await spClient.get('/_api/web/title');
+        return {
+            success: true,
+            siteTitle: response.data.d.Title,
+            message: 'Successfully connected to SharePoint site'
+        };
+    } catch (error) {
+        console.error('SharePoint connection test failed:', error.response?.data || error.message);
+        return {
+            success: false,
+            error: error.message,
+            details: error.response?.data
+        };
+    }
+}
+
 module.exports = {
     createChangeRequest,
     updateChangeRequest,
     getChangeRequests,
-    getChangeRequestById
+    getChangeRequestById,
+    testConnection
 };
